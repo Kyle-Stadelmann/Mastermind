@@ -15,19 +15,20 @@ I planned the following schedule (around other responsibilities) to keep myself 
 | Basic UI setup                   | 11/17/21      |
 | Basic UI setup                   | 11/17/21      |
 
-## Primary Goals
+## Goals
+### Primary Goals
 - Implement at least a basic form of mastermind using 10 rows, 6 color pegs (using letter to denote color), no duplicate colors (for less complexity)
 - Basic input (type first letter of color in order, enter to confirm, backspace to change)
 - Simply end program with win/lose text after completion.
 - I hope to gain enough valuable experience with Haskell that I can comfortably work with it on a regular basis
 - I am very excited for this project and intend to add it to my resume
 
-## Secondary Goals
+### Secondary Goals
 - Using actual colors for pegs
 - Inputting colored pegs using a 'currently selected tile' highlighted ui piece
 - Restart and play again ui
 
-## Stretch Goals
+### Stretch Goals
 - Basic victory/lose screen
 - Allow extra rule toggle such as a duplicate color button (changes key-peg and other logic)
 
