@@ -32,3 +32,6 @@ I planned the following schedule (around other responsibilities) to keep myself 
 - Allow extra rule toggle such as a duplicate color button (changes key-peg and other logic)
 
 I aimed to be realistic with these goals and how likely I am to achieve them.
+
+### Crude Sketch of Planned UI 
+![mastermind](https://i.imgur.com/vbDcMVc.png)
