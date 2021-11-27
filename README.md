@@ -9,14 +9,14 @@ I didn't realize until a couple days before the proposal deadline that the final
 Nonetheless, I would like to embark on this project solo due to various reasons (I hope with the following justification/timeline, to gain permission). My past relevant coursework includes CSE 130, 131, 231 and now 230. In CSE 231, I participated in a group project at the end of the course [link to my group's repo here](https://github.com/R167/chocopy-wasm-compiler). This project was fun/interesting, but I found it somewhat dissapointing as I couldn't contribute as much as I wanted to due to the lack of available work combined with the group setting. So in order to make this a project I'm more proud of (and fully understand the intricacies of) I'd like to attempt it individually. I'm prepared to put in the extra hours/work to make this a successful project- as this is the kind of side-project that I would enjoy outside of school anyway. Thank you for the consideration, and I deeply apologize for not finding a group in time.
 
 I planned the following schedule (around other responsibilities) to keep myself in check and to ensure success in implementing this project. Reasonably small goals were placed every few days to allow for adjustments to the timeline if necessary, but overall, to ensure steady progress. I left extra time towards the end for wrapping up, secondary, and stretch goals. This time will act as a buffer to ensure the primary goals were accomplished before continuing on to the lower priority ones.
-| Feature                                                                    | Target Date   | Completed Date |
-| -------------------------------------------------------------------------- | ------------- | -------------- |
-| Repo creation/setup                                                        | 11/15/21      |
-| Data structures (and state) planning/setup                                 | 11/17/21      |
-| Basic UI setup                                                             | 11/20/21      |
+| Feature                                                                    | Target Date   | Completed |
+| -------------------------------------------------------------------------- | ------------- | ----------|
+| Repo creation/setup                                                        | 11/15/21      |     ✔
+| Data structures (and state) planning/setup                                 | 11/17/21      |     ✔
+| Basic UI setup                                                             | 11/20/21      |     ✔
 | Helper functions to manipulate UI (state) using data structures            | 11/22/21      |
 | Helper functions to take input and display on board                        | 11/24/21      |
-| Game logic functions: generate code + generate key pegs based off input    | 11/27/21      |
+| Game logic functions: generate code + generate key pegs based off input    | 11/27/21      |     ✔
 | Game logic functions: increment round                                      | 12/1/21       |
 | Wrap up: confirm easy installation on other environments, unit tests, etc. | 12/4/21       |
 | Stretch/secondary goals: win/lose screens, restart buttons, etc.           | 12/7/21       |
