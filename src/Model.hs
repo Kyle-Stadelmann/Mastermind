@@ -24,7 +24,7 @@ data PlayState = PS
   , psBoard  :: Board.Board     -- ^ current board (player rows)
   , psPos    :: Board.Pos       -- ^ current cursor (within the current row)
   , psHints  :: Board.Hints     -- ^ current hints given thus far
-  , psResult :: Board.Result    -- ^ game result
+  , psResult :: Maybe Board.Result    -- ^ game result
   } 
 
 
@@ -35,7 +35,7 @@ init = PS
   , psBoard  = Board.initBoard
   , psPos    = Board.Pos 1 1 
   , psHints  = Board.initHints
-  , psResult = Board.Lose
+  , psResult = Nothing
   }
 
 isCurr :: PlayState -> Int -> Int -> Bool

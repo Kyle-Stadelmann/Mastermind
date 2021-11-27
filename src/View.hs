@@ -9,26 +9,23 @@ import Text.Printf (printf)
 import Model
 import Model.Board as B
 import Graphics.Vty as V hiding (dim)
+import Model.Computer
+import System.IO.Unsafe (unsafePerformIO)
 
 -------------------------------------------------------------------------------
 view :: PlayState -> [Widget String]
 -------------------------------------------------------------------------------
 view s = [center $ viewHelper s]
---view s = [center $ border $ str "test"]
 
 viewHelper :: PlayState -> Widget n
-viewHelper s = joinBorders $ (borderWithLabel (str (header s))) $ vBox [makeMainBoard s, hLimit 52 hBorder, makeAvailColors]
+viewHelper s = joinBorders 
+               $ (borderWithLabel (str (header s))) 
+               $ vBox [makeMainBoard s, hLimit 52 hBorder, makeAvailColors]
 
-makeAvailColors :: Widget n
-makeAvailColors =   
-   (padLeft (Pad 18) $ str "Available Colors")
-    <=> (padLeft (Pad 13) availColorBox)
 
-availColorBox :: Widget n
-availColorBox = 
-  border $
-    hBox [makeColorPeg c | c <- allColors]
-
+-------------------------------------------------------------------------------
+-- | Main board ---------------------------------------------------------------
+-------------------------------------------------------------------------------
 makeMainBoard :: PlayState -> Widget n
 makeMainBoard s = vBox $ (makeCodeRow s):[makeRow s row | row <- [rows,rows-1..1]]
 
@@ -43,14 +40,61 @@ makePeg s r c
   | isCurr s r c = withCursor raw
   | otherwise    = raw
   where
-    raw = makeColorPeg Red
+    raw        = makeColorPeg maybeColor
+    maybeColor = boardLookup board pos
+    pos        = Pos r c
+    board      = psBoard s
 
-makeColorPeg :: B.Color -> Widget n
-makeColorPeg c = border $ withAttr (colorToAttr c) peg
+makeColorPeg :: Maybe B.Color -> Widget n
+makeColorPeg maybeColor = border $ withAttr (colorToAttr color) peg
+  where
+    color = case maybeColor of
+              Just c -> c
+              _      -> defaultColor
 
 peg :: Widget n
 peg = str "  "
 
+-------------------------------------------------------------------------------
+-- | Avail colors box ---------------------------------------------------------
+-------------------------------------------------------------------------------
+makeAvailColors :: Widget n
+makeAvailColors =   
+   (padLeft (Pad 18) $ str "Available Colors")
+    <=> (padLeft (Pad 13) availColorBox)
+
+availColorBox :: Widget n
+availColorBox = 
+  border $
+    hBox [makeColorPeg (Just c) | c <- allColors]
+
+-------------------------------------------------------------------------------
+-- | Secret code row ----------------------------------------------------------
+-------------------------------------------------------------------------------
+makeCodeRow :: PlayState -> Widget n
+makeCodeRow s = padAll 2 (str "Hints")
+                <+> (padLeftRight 4 (border $ hBox [padLeftRight 1 (makeCodePeg s c) | c <- [0..cols-1]]))
+                <+> padAll 2 (str "Hints")
+
+makeCodePeg :: PlayState -> Int -> Widget n
+makeCodePeg s c = border $ peg
+  where
+    peg   = case maybeResult of
+                    -- Game over; display the previously hidden code
+                    Just _  -> makeColorPeg (maybeColor)
+                    -- Active game still going; no result yet; display hiddenCodePeg
+                    Nothing -> withAttr (colorToAttr Black) hiddenCodePeg
+    maybeResult = psResult s
+    code = unsafePerformIO (psCode s)
+    maybeColor = Just (code !! c)
+
+
+hiddenCodePeg :: Widget n
+hiddenCodePeg = str "??"
+
+-------------------------------------------------------------------------------
+-- | Hint rows ----------------------------------------------------------------
+-------------------------------------------------------------------------------
 makeLeftHalfHintRow :: PlayState -> Int -> Widget n
 makeLeftHalfHintRow s r = padRight (Pad 2) $ border
                           $ hBox [(makeHintPeg s r c) | c <- [cols,cols-1..(cols `div` 2 + 1)]]
@@ -60,19 +104,19 @@ makeRightHalfHintRow s r = padLeft (Pad 2) $ border
                             $ hBox [(makeHintPeg s r c) | c <- [cols `div` 2,(cols `div` 2)-1..1]]
 
 makeHintPeg :: PlayState -> Int -> Int -> Widget n
-makeHintPeg s r c = border $ withAttr redAttr peg
+makeHintPeg s r c = makeColorPeg color
+  where
+    color = case hint of
+              Just ColorPos  -> Just Red
+              Just Color     -> Just White
+              _              -> Nothing
+    hint = hintLookup hints pos
+    pos = Pos r c
+    hints = psHints s
 
-makeCodeRow :: PlayState -> Widget n
-makeCodeRow s = padAll 2 (str "Hints")
-                <+> (padLeftRight 4 (border $ hBox [padLeftRight 1 (makeCodePeg s c) | c <- [cols,cols-1..1]]))
-                <+> padAll 2 (str "Hints")
-
-makeCodePeg :: PlayState -> Int -> Widget n
-makeCodePeg s c = border $ withAttr blackAttr hiddenCodePeg
-
-hiddenCodePeg :: Widget n
-hiddenCodePeg = str "??"
-
+-------------------------------------------------------------------------------
+-- | Util ---------------------------------------------------------------------
+-------------------------------------------------------------------------------
 header :: PlayState -> String
 header s = printf "Mastermind Turn = %s, row = %d, col = %d" (show (psTurn s)) (pRow p) (pCol p)
   where 
@@ -91,7 +135,8 @@ colorToAttr Green = greenAttr
 colorToAttr Red = redAttr
 colorToAttr Yellow = yellowAttr
 colorToAttr Pink = pinkAttr
-
+colorToAttr White = whiteAttr
+colorToAttr Black = blackAttr
 
 -------------------------------------------------------------------------------
 -- | Attributes ---------------------------------------------------------------

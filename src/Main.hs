@@ -31,7 +31,7 @@ main = do
   let buildVty = V.mkVty V.defaultConfig
   initialVty <- buildVty
   res <- customMain initialVty buildVty (Just chan) app Model.init
-  if (psResult res) == Board.Win
+  if (psResult res) == Just Board.Win
     then print "Congrats you won!"
     else print "Sorry, you lost"
 

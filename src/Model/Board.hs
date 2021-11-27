@@ -13,12 +13,13 @@ type Board = M.Map Pos Color
 -- max dim of cols * rows
 type Hints = M.Map Pos Hint
 
--------------------------------------------------------------------------------
--- | Core types/data structures -----------------------------------------------
--------------------------------------------------------------------------------
+-- White and Black are purely hint colors
 data Color = 
-  Blue | Orange | Green | Red | Yellow | Pink
+  Blue | Orange | Green | Red | Yellow | Pink | White | Black
   deriving (Eq, Show)
+-- These are the playable colors (non hint colors)
+allColors :: [Color]
+allColors = [Blue, Orange, Green, Red, Yellow, Pink]
 
 -- max dim of cols
 type Code = [Color]
@@ -47,8 +48,11 @@ initBoard = M.empty
 initHints :: Hints
 initHints = M.empty
 
-allColors :: [Color]
-allColors = [Blue, Orange, Green, Red, Yellow, Pink]
+boardLookup :: Board -> Pos -> Maybe Color 
+boardLookup board pos = M.lookup pos board
+
+hintLookup :: Hints -> Pos -> Maybe Hint 
+hintLookup hints pos = M.lookup pos hints
 
 -------------------------------------------------------------------------------
 -- | Constants ----------------------------------------------------------------
@@ -58,3 +62,7 @@ cols = 4
 
 rows :: Int
 rows = 10
+
+-- Default color of empty hint and main pegs
+defaultColor :: Color
+defaultColor = Black
