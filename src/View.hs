@@ -10,7 +10,6 @@ import Model
 import Model.Board as B
 import Graphics.Vty as V hiding (dim)
 import Model.Computer
-import System.IO.Unsafe (unsafePerformIO)
 
 -------------------------------------------------------------------------------
 view :: PlayState -> [Widget String]
@@ -77,15 +76,15 @@ makeCodeRow s = padAll 2 (str "Hints")
                 <+> padAll 2 (str "Hints")
 
 makeCodePeg :: PlayState -> Int -> Widget n
-makeCodePeg s c = border $ peg
+makeCodePeg s c = peg
   where
     peg   = case maybeResult of
                     -- Game over; display the previously hidden code
                     Just _  -> makeColorPeg (maybeColor)
                     -- Active game still going; no result yet; display hiddenCodePeg
-                    Nothing -> withAttr (colorToAttr Black) hiddenCodePeg
+                    Nothing -> border $ withAttr (colorToAttr Black) hiddenCodePeg
     maybeResult = psResult s
-    code = unsafePerformIO (psCode s)
+    code = psCode s
     maybeColor = Just (code !! c)
 
 
@@ -156,10 +155,10 @@ attributeMap = attrMap
   V.defAttr
   [ 
     (blueAttr, bg V.blue),
-    (orangeAttr, bg $ V.rgbColor 255 153 51),
+    (orangeAttr, bg $ V.rgbColor 255 140 0),
     (greenAttr, bg V.green),
-    (redAttr, bg V.red ),
-    (yellowAttr, bg V.yellow),
+    (redAttr, bg V.red),
+    (yellowAttr, bg $ V.rgbColor 255 255 0),
     (pinkAttr, bg $ V.rgbColor 255 153 255),
     (blackAttr, bg V.black),
     (whiteAttr, bg V.white)

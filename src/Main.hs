@@ -41,6 +41,5 @@ app = App
   , appChooseCursor = const . const Nothing
   , appHandleEvent  = control 
   , appStartEvent   = return
-  --, appAttrMap      = const (attrMap defAttr [])
   , appAttrMap      = const attributeMap
   }

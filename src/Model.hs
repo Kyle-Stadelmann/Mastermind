@@ -19,8 +19,8 @@ data State
   | Outro 
   
 data PlayState = PS
-  { psCode   :: IO Board.Code   -- ^ generated answer color code
-  , psTurn   :: Integer         -- ^ what turn we are on (current row)
+  { psCode   :: Board.Code   -- ^ generated answer color code
+  , psTurn   :: Int         -- ^ what turn we are on (current row)
   , psBoard  :: Board.Board     -- ^ current board (player rows)
   , psPos    :: Board.Pos       -- ^ current cursor (within the current row)
   , psHints  :: Board.Hints     -- ^ current hints given thus far

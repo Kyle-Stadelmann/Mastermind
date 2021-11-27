@@ -54,6 +54,19 @@ boardLookup board pos = M.lookup pos board
 hintLookup :: Hints -> Pos -> Maybe Hint 
 hintLookup hints pos = M.lookup pos hints
 
+left :: Pos -> Pos 
+left p = p 
+  { pCol   = max 1 (pCol p - 1) 
+  } 
+
+right :: Pos -> Pos 
+right p = p 
+  { pCol = min cols (pCol p + 1) 
+  } 
+
+insertColor :: Board -> Pos -> Color -> Board
+insertColor b p c = M.insert p c b
+
 -------------------------------------------------------------------------------
 -- | Constants ----------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -66,3 +79,13 @@ rows = 10
 -- Default color of empty hint and main pegs
 defaultColor :: Color
 defaultColor = Black
+
+keyColorMap :: M.Map Char Color
+keyColorMap = M.fromList 
+              [('b', Blue), 
+               ('o', Orange),
+               ('g', Green),
+               ('r', Red),
+               ('y', Yellow),
+               ('p', Pink)
+              ]
