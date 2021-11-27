@@ -14,8 +14,8 @@ I planned the following schedule (around other responsibilities) to keep myself 
 | Repo creation/setup                                                        | 11/15/21      |     ✔
 | Data structures (and state) planning/setup                                 | 11/17/21      |     ✔
 | Basic UI setup                                                             | 11/20/21      |     ✔
-| Helper functions to manipulate UI (state) using data structures            | 11/22/21      |
-| Helper functions to take input and display on board                        | 11/24/21      |
+| Helper functions to manipulate UI (state) using data structures            | 11/22/21      |     ✔
+| Helper functions to take input and display on board                        | 11/24/21      |     ✔
 | Game logic functions: generate code + generate key pegs based off input    | 11/27/21      |     ✔
 | Game logic functions: increment round                                      | 12/1/21       |
 | Wrap up: confirm easy installation on other environments, unit tests, etc. | 12/4/21       |
