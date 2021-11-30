@@ -48,7 +48,7 @@ I aimed to be realistic with these goals and how likely I am to achieve them.
 ### Overall progress
 As seen above in my feature calendar chart, I'm progressing as expected, and am likely going to be done with the core functionality (the MVP) by the end of this week. This will give me some extra time to implement the secondary and stretch goals (2 of which I've actually finished already: colored pegs, and selected/highlighted tile). I expect to complete more than I originally intended, as this project is turning out to be even more fun than I originally anticipated.
 
-### Current UI (Note: working directional movement and confirm button (enter)
+### Current UI (Note: working directional movement and confirm button (enter))
 ![mastermind](https://i.imgur.com/oHQ5PtB.jpg)
 
 ### Architecture 
