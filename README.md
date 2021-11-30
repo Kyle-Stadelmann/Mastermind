@@ -43,3 +43,34 @@ I aimed to be realistic with these goals and how likely I am to achieve them.
 
 ### Crude Sketch of Planned UI 
 ![mastermind](https://i.imgur.com/vbDcMVc.png)
+
+# Milestone 2: Updates
+### Overall progress
+As seen above in my feature calendar chart, I'm progressing as expected, and am likely going to be done with the core functionality (the MVP) by the end of this week. This will give me some extra time to implement the secondary and stretch goals (2 of which I've actually finished already: colored pegs, and selected/highlighted tile). I expect to complete more than I originally intended, as this project is turning out to be even more fun than I originally anticipated.
+
+### Current UI (Note: working directional movement and confirm button (enter)
+![mastermind](https://i.imgur.com/oHQ5PtB.jpg)
+
+### Architecture 
+After studying the brick library and common implementations (including the starter code), I've split up the project into a few different components: View, Control, Model, and Main. Code for the UI implementation/manipulation, attributes, etc. are in [View.hs](https://github.com/Kyle-Stadelmann/Mastermind/blob/main/src/View.hs). All user input and helper functions that mutate the main state object, can be found in [Control.hs](https://github.com/Kyle-Stadelmann/Mastermind/blob/main/src/Control.hs). Classes/types that define the main state object (as well as the corresponding initialize state), are located in [Model.hs](https://github.com/Kyle-Stadelmann/Mastermind/blob/main/src/Model.hs). Note, there is also a Model folder with various helper functions/types that the main model component uses. And finally, the start of the program can be found in [Main.hs](https://github.com/Kyle-Stadelmann/Mastermind/blob/main/src/Main.hs).
+
+The most noteable design pieces come from Model.hs.
+```
+data PlayState = PS
+  { psCode   :: Board.Code   -- ^ generated answer color code
+  , psTurn   :: Int         -- ^ what turn we are on (current row)
+  , psBoard  :: Board.Board     -- ^ current board (player rows)
+  , psPos    :: Board.Pos       -- ^ current cursor (within the current row)
+  , psHints  :: Board.Hints     -- ^ current hints given thus far
+  , psResult :: Maybe Board.Result    -- ^ game result
+  } 
+```
+This defines the core state object that Control manipulates and UI displays. For a brief overview, we have the generated code that the user is trying to guess, the turn number, the board (mapping of pos -> Peg Color), pos (row,col pairs), the color hints we've given thus far, and the current result of the game (Win, Lose, Ongoing).
+
+### Libraries
+I don't plan on using many libraries other than the base ones from the starter code. Namely, Brick, Vty (for colors, attributes, etc. for the UI portion), maps (from the Data library), random (for generating a secret code), and potentially various prelude functions. 
+
+### Challenges
+So far the biggest challenges were definitely in designing all the various objects/Playstate and fighting the UI. When deciding which data types best represent the game objects, I went through each piece of the game and came up with a few different representations. Quickly, I was able to see what worked and what didn't. But I certainty found that as I moved on to actual implementations that the designs I had planned did not hold up. So I was stuck in indecisiveness switching back and forth between different models for board, pos, result, etc. before finally deciding on the ones above. 
+
+The other big challenge (and definitely the largest time sink) was developing the UI. Firstly, I was quite disappointed at the fact that there are no default circles (and ASCII circles would be too big to fit on one screen). Also, one of my stretch goals was to allow various configurations of the game (more/less rows or columns), but after fighting to use generic padding/centering for hours, I finally decided to use constant offsets that would not work for other configurations. This means, that if I still intend to achieve that goal, I will likely have only a few different set configs instead that each have their own manual paddings (that I decide from trial and error). Overall, centering has been very annoying to deal with due to the way brick works with spacing, but I believe I've settled on something I'm happy with.
