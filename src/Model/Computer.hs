@@ -32,6 +32,52 @@ generateColorNoDupes allColors currColors =
 -------------------------------------------------------------------------------
 -- | Logic functions ----------------------------------------------------------
 -------------------------------------------------------------------------------
+generateHints :: Code -> Board -> Int -> Hints -> Hints
+generateHints code b row currHints = insertHintRow currHints hintList row
+  where
+    hintList         = [getHintByPos hintCounts row col | col <- [1..cols]]
+    hintCounts       = foldr countHintTypes (0,0,0) hintListUnsorted
+    hintListUnsorted = [generateHint code b row col | col <- [1..cols]]
+
+generateHint :: Code -> Board -> Int -> Int -> Hint
+generateHint code b row col = 
+  case actualColorMaybe of
+    Nothing           -> Incorrect
+    Just actualColor  -> compareWithCode code actualColor col
+  where
+    actualColorMaybe   = (boardLookup b (Pos row col))
+
+compareWithCode :: Code -> Color -> Int -> Hint
+compareWithCode code color col
+  | color == expectedColor = ColorPos
+  | colorInCode code color = Color
+  | True                   = Incorrect
+  where
+    -- minus 1 because we are 1-based indexing for pos
+    expectedColor = (code !! (col-1))
+
+-- Returns count of (ColorPos, Color, Incorrect) tuple
+countHintTypes :: Hint -> (Int, Int, Int) -> (Int, Int, Int)
+countHintTypes ColorPos  (cp,c,i) = (cp+1,c,i)
+countHintTypes Color     (cp,c,i) = (cp,c+1,i)
+countHintTypes Incorrect (cp,c,i) = (cp,c,i+1)
+
+-- Inserts hints based off (ColorPos, Color, Incorrect) tuple
+getHintByPos :: (Int, Int, Int) -> Int -> Int -> Hint
+getHintByPos (cp,c,i) row col 
+  | cp >= col       = ColorPos
+  | (cp + c) >= col = Color
+  | True            = Incorrect
+
+-- >>> [generateHint [Blue,Green,Red,Orange] (M.insert (Pos 1 1) Blue (M.empty)) 1 col | col <- [1..cols]]
+-- [ColorPos,Incorrect,Incorrect,Incorrect]
+--
+
+-- >>> compareWithCode [Blue,Green,Red,Orange] Blue 1
+-- ColorPos
+--
+
+
 interpretResult :: Code -> Board -> Int -> Maybe Result
 interpretResult c b turn = 
   if correctness
@@ -44,16 +90,11 @@ interpretResult c b turn =
     isLastTurn  = turn == rows
 
 isRowCorrect :: Code -> Board -> Int -> Int -> Bool
-isRowCorrect c b row (5) = True
-isRowCorrect c b row col = if isCellCorrect c b row col
-                             then isRowCorrect c b row (col+1)
-                             else False
-
-isCellCorrect :: Code -> Board -> Int -> Int -> Bool
-isCellCorrect c b row col = 
-  case actualColor of
-    Nothing -> False
-    Just c  -> c == expectedColor
+isRowCorrect _ _ _   5 = True
+isRowCorrect code b row col = 
+  if correct
+    then isRowCorrect code b row (col+1)
+    else False
   where
-    actualColor   = (boardLookup b (Pos row col))
-    expectedColor = (c !! col)
+    correct = hint == ColorPos
+    hint    = generateHint code b row col

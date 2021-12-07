@@ -54,6 +54,9 @@ boardLookup board pos = M.lookup pos board
 hintLookup :: Hints -> Pos -> Maybe Hint 
 hintLookup hints pos = M.lookup pos hints
 
+colorInCode :: Code -> Color -> Bool
+colorInCode code color = elem color code
+
 left :: Pos -> Pos 
 left p = p 
   { pCol   = max 1 (pCol p - 1) 
@@ -66,6 +69,17 @@ right p = p
 
 insertColor :: Board -> Pos -> Color -> Board
 insertColor b p c = M.insert p c b
+
+insertHintRow :: Hints -> [Hint] -> Int -> Hints
+insertHintRow currHints []     _   = currHints
+insertHintRow currHints (h:hs) row = insertHintRow (M.insert pos h currHints) hs row
+  where
+    pos = Pos row col
+    -- plus 1 since we are doing 1-based indexing
+    col = (cols - (length hs)) + 1
+
+insertHint :: Hints -> Pos -> Hint -> Hints
+insertHint hs p h = M.insert p h hs
 
 -------------------------------------------------------------------------------
 -- | Constants ----------------------------------------------------------------

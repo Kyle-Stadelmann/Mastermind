@@ -44,16 +44,18 @@ inputEnterKey s =
       Brick.continue s'
     Nothing ->
       -- generate hints
-      let turn' = turn + 1 
-          pos'  = Pos turn' 1
+      let turn'  = turn + 1 
+          pos'   = Pos turn' 1
+          hints' = generateHints code board turn hints
       in    
-      Brick.continue (s {psTurn = turn', psPos = pos'})
+      Brick.continue (s {psTurn = turn', psPos = pos', psHints = hints'})
 
   where
     result = interpretResult code board turn
     board  = psBoard s
     code   = psCode s
     turn   = psTurn s
+    hints  = psHints s
 
 {-
 -------------------------------------------------------------------------------
