@@ -42,3 +42,6 @@ isCurr :: PlayState -> Int -> Int -> Bool
 isCurr s r c = Board.pRow p == r && Board.pCol p == c
   where 
     p = psPos s 
+
+newGame :: PlayState
+newGame = Model.init

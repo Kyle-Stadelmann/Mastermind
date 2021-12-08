@@ -17,14 +17,17 @@ view :: PlayState -> [Widget String]
 view s = [center $ viewHelper s]
 
 viewHelper :: PlayState -> Widget n
-viewHelper s = joinBorders 
-               $ (borderWithLabel (str (header s))) 
-               $ vBox [makeMainBoard s, hLimit 52 hBorder, makeAvailColors]
+viewHelper s = (padRight (Pad 8) makeAvailColors)
+               <+> (makeMainBoardWithBorder s <=> (endScreenText s))
+               <+> (padLeft (Pad 8) makeControlBox)
 
 
 -------------------------------------------------------------------------------
 -- | Main board ---------------------------------------------------------------
 -------------------------------------------------------------------------------
+makeMainBoardWithBorder :: PlayState -> Widget n
+makeMainBoardWithBorder s = ((borderWithLabel (str (mainHeader s))) $ (makeMainBoard s))
+
 makeMainBoard :: PlayState -> Widget n
 makeMainBoard s = vBox $ (makeCodeRow s):[makeRow s row | row <- [rows,rows-1..1]]
 
@@ -59,13 +62,44 @@ peg = str "  "
 -------------------------------------------------------------------------------
 makeAvailColors :: Widget n
 makeAvailColors =   
-   (padLeft (Pad 18) $ str "Available Colors")
-    <=> (padLeft (Pad 13) availColorBox)
+   borderWithLabel (str availHeader)
+   $ availColorBox
 
 availColorBox :: Widget n
 availColorBox = 
   border $
     hBox [makeColorPeg (Just c) | c <- allColors]
+
+-------------------------------------------------------------------------------
+-- | End Screen Text ----------------------------------------------------------
+-------------------------------------------------------------------------------
+endScreenText :: PlayState -> Widget n
+endScreenText s = text
+  where
+    text   = case result of
+               Just Win     -> withAttr victoryAttr (str "Congratulations, you won! Start a new game with \"=\"")
+               Just Lose    -> withAttr loseAttr    (str "Sorry, you lost! Start a new game with \"=\"")
+               Nothing -> str ""
+    result = psResult s
+    
+-------------------------------------------------------------------------------
+-- | Control box --------------------------------------------------------------
+-------------------------------------------------------------------------------
+makeControlBox :: Widget n
+makeControlBox = borderWithLabel (str controlHeader) $ makeControls
+
+makeControls :: Widget n
+makeControls = hLimit 30
+               $ vBox [ makeControl "Left" "←"
+                      , makeControl "Right" "→"
+                      , makeControl "End turn" "Enter"
+                      , makeControl "End game" "Esc"
+                      , makeControl "New game" "="
+                      ]
+
+makeControl :: String -> String -> Widget n
+makeControl function key = str function 
+                           <+> (padLeft Max $ str key)
 
 -------------------------------------------------------------------------------
 -- | Secret code row ----------------------------------------------------------
@@ -116,10 +150,16 @@ makeHintPeg s r c = makeColorPeg color
 -------------------------------------------------------------------------------
 -- | Util ---------------------------------------------------------------------
 -------------------------------------------------------------------------------
-header :: PlayState -> String
-header s = printf "Mastermind Turn = %s, row = %d, col = %d" (show (psTurn s)) (pRow p) (pCol p)
+mainHeader :: PlayState -> String
+mainHeader s = printf "Mastermind Turn = %s, row = %d, col = %d" (show (psTurn s)) (pRow p) (pCol p)
   where 
     p    = psPos s
+
+availHeader :: String
+availHeader = "Available Colors"
+
+controlHeader :: String
+controlHeader = "Controls"
 
 withCursor :: Widget n -> Widget n
 withCursor = modifyDefAttr (`withStyle` reverseVideo)
@@ -140,7 +180,7 @@ colorToAttr Black = blackAttr
 -------------------------------------------------------------------------------
 -- | Attributes ---------------------------------------------------------------
 -------------------------------------------------------------------------------
-blueAttr, orangeAttr, greenAttr, redAttr, yellowAttr, pinkAttr, blackAttr, whiteAttr :: AttrName
+blueAttr, orangeAttr, greenAttr, redAttr, yellowAttr, pinkAttr, blackAttr, whiteAttr, victoryAttr, loseAttr :: AttrName
 blueAttr = attrName "blue"
 orangeAttr = attrName "orange"
 greenAttr = attrName "green"
@@ -149,6 +189,8 @@ yellowAttr = attrName "yellow"
 pinkAttr = attrName "pink"
 blackAttr = attrName "black"
 whiteAttr = attrName "white"
+victoryAttr = attrName "victory"
+loseAttr = attrName "lose"
 
 attributeMap :: AttrMap
 attributeMap = attrMap
@@ -161,5 +203,7 @@ attributeMap = attrMap
     (yellowAttr, bg $ V.rgbColor 255 255 0),
     (pinkAttr, bg $ V.rgbColor 255 153 255),
     (blackAttr, bg V.black),
-    (whiteAttr, bg V.white)
+    (whiteAttr, bg V.white),
+    (victoryAttr, fg V.green),
+    (loseAttr, fg V.red)
   ]

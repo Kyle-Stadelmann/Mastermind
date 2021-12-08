@@ -13,6 +13,7 @@ import Data.Map as M
 control :: PlayState -> BrickEvent n Tick -> EventM n (Next PlayState)
 control s ev = case ev of 
   T.VtyEvent (V.EvKey V.KEnter _)       -> inputEnterKey s
+  T.VtyEvent (V.EvKey (V.KChar '=') _)  -> Brick.continue newGame
   T.VtyEvent (V.EvKey (V.KChar key) _)  -> inputCharKey s key
   T.VtyEvent (V.EvKey V.KLeft _)        -> Brick.continue (move left  s)
   T.VtyEvent (V.EvKey V.KRight _)       -> Brick.continue (move right s)
@@ -64,6 +65,7 @@ inputEnterKey s =
     code   = psCode s
     turn   = psTurn s
     hints  = psHints s
+
 
 {-
 -------------------------------------------------------------------------------
