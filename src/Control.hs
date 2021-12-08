@@ -22,7 +22,15 @@ control s ev = case ev of
 -------------------------------------------------------------------------------
 move :: (Pos -> Pos) -> PlayState -> PlayState
 -------------------------------------------------------------------------------
-move f s = s { psPos = f (psPos s) }
+move f s = if gameFinished
+             then s
+             else s'
+  where
+    s' = s { psPos = f (psPos s) }
+    gameFinished = case result of
+                     Just _ -> True
+                     Nothing -> False
+    result = psResult s    
 
 inputCharKey :: PlayState -> Char -> EventM n (Next PlayState)
 inputCharKey s key = case maybeColor of
