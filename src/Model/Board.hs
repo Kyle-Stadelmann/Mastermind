@@ -39,6 +39,10 @@ data Result
   | Lose
   deriving (Eq, Show)
 
+data Difficulty
+  = Easy | Medium | Hard
+  deriving (Eq, Show)
+
 -------------------------------------------------------------------------------
 -- | Helper functions ---------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -84,6 +88,9 @@ insertHint hs p h = M.insert p h hs
 maybeColorToColor :: Maybe Color -> Color
 maybeColorToColor (Just v) = v
 maybeColorToColor Nothing = defaultColor
+
+firstLetterColor :: Color -> String
+firstLetterColor color = [head (show color)]
 
 -------------------------------------------------------------------------------
 -- | Constants ----------------------------------------------------------------

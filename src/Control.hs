@@ -13,7 +13,8 @@ import Data.Map as M
 control :: PlayState -> BrickEvent n Tick -> EventM n (Next PlayState)
 control s ev = case ev of 
   T.VtyEvent (V.EvKey V.KEnter _)       -> inputEnterKey s
-  T.VtyEvent (V.EvKey (V.KChar '=') _)  -> Brick.continue newGame
+  T.VtyEvent (V.EvKey (V.KChar '-') _)  -> Brick.continue $ toggleDifficulty s
+  T.VtyEvent (V.EvKey (V.KChar '=') _)  -> Brick.continue $ newGame s
   T.VtyEvent (V.EvKey (V.KChar key) _)  -> inputCharKey s key
   T.VtyEvent (V.EvKey V.KLeft _)        -> Brick.continue (move left  s)
   T.VtyEvent (V.EvKey V.KRight _)       -> Brick.continue (move right s)
@@ -47,9 +48,9 @@ inputEnterKey :: PlayState -> EventM n (Next PlayState)
 inputEnterKey s = 
   case result of
     Just _ ->
-      let s' = s {psResult = result} 
+      let hints' = generateHints code board turn hints 
       in
-      Brick.continue s'
+      Brick.continue s {psHints = hints', psResult = result}
     Nothing ->
       -- generate hints
       let turn'  = turn + 1 

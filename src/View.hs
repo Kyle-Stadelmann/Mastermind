@@ -1,15 +1,13 @@
 module View where
 
 import Brick
-import Brick.Widgets.Center (center, hCenter, hCenterLayer, hCenterWith, centerAbout)
-import Brick.Widgets.Border (border, borderWithLabel, hBorder, vBorder)
-import Brick.Widgets.Border.Style (unicode)
+import Brick.Widgets.Center 
+import Brick.Widgets.Border 
 import Text.Printf (printf)
 
 import Model
 import Model.Board as B
 import Graphics.Vty as V hiding (dim)
-import Model.Computer
 
 -------------------------------------------------------------------------------
 view :: PlayState -> [Widget String]
@@ -19,8 +17,7 @@ view s = [center $ viewHelper s]
 viewHelper :: PlayState -> Widget n
 viewHelper s = (padRight (Pad 8) makeAvailColors)
                <+> (makeMainBoardWithBorder s <=> (endScreenText s))
-               <+> (padLeft (Pad 8) makeControlBox)
-
+               <+> (padLeft (Pad 8) (makeControlBox <=> (padTop (Pad 1) $ makeDifficultyBox s)))
 
 -------------------------------------------------------------------------------
 -- | Main board ---------------------------------------------------------------
@@ -92,16 +89,32 @@ makeControlBox = borderWithLabel (str controlHeader) $ makeControls
 
 makeControls :: Widget n
 makeControls = hLimit 30
-               $ vBox [ makeControl "Left" "←"
-                      , makeControl "Right" "→"
-                      , makeControl "End turn" "Enter"
-                      , makeControl "End game" "Esc"
-                      , makeControl "New game" "="
-                      ]
+               $ vBox ([ makeControl "Left" "←"
+                       , makeControl "Right" "→"
+                       , makeControl "End turn" "Enter"
+                       , makeControl "End game" "Esc"
+                       , makeControl "New game" "="
+                       , makeControl "Toggle Next Game Difficulty" "-"
+                       ]
+                       ++ colorControls
+                      )
+  where
+    colorControls = map (\color -> makeControl (show color) (firstLetterColor color)) allColors
 
 makeControl :: String -> String -> Widget n
 makeControl function key = str function 
                            <+> (padLeft Max $ str key)
+
+-------------------------------------------------------------------------------
+-- | Difficulty box -----------------------------------------------------------
+-------------------------------------------------------------------------------
+makeDifficultyBox :: PlayState -> Widget n
+makeDifficultyBox s = hLimit 32
+                      $ borderWithLabel (str "Difficulty")
+                      $ hCenter widgetDiff
+  where
+    widgetDiff = withAttr (difficultyToAttr diff) (str $ show diff)
+    diff = psDifficulty s
 
 -------------------------------------------------------------------------------
 -- | Secret code row ----------------------------------------------------------
@@ -167,7 +180,7 @@ withCursor :: Widget n -> Widget n
 withCursor = modifyDefAttr (`withStyle` reverseVideo)
 
 -------------------------------------------------------------------------------
--- | Colors -------------------------------------------------------------------
+-- | Attribute mappings  ------------------------------------------------------
 -------------------------------------------------------------------------------
 colorToAttr :: B.Color -> AttrName
 colorToAttr Blue = blueAttr
@@ -179,10 +192,16 @@ colorToAttr Pink = pinkAttr
 colorToAttr White = whiteAttr
 colorToAttr Black = blackAttr
 
+difficultyToAttr :: B.Difficulty -> AttrName
+difficultyToAttr Easy = easyAttr
+difficultyToAttr Medium = medAttr
+difficultyToAttr Hard = hardAttr
+
+
 -------------------------------------------------------------------------------
 -- | Attributes ---------------------------------------------------------------
 -------------------------------------------------------------------------------
-blueAttr, orangeAttr, greenAttr, redAttr, yellowAttr, pinkAttr, blackAttr, whiteAttr, victoryAttr, loseAttr :: AttrName
+blueAttr, orangeAttr, greenAttr, redAttr, yellowAttr, pinkAttr, blackAttr, whiteAttr, victoryAttr, loseAttr, easyAttr, medAttr, hardAttr :: AttrName
 blueAttr = attrName "blue"
 orangeAttr = attrName "orange"
 greenAttr = attrName "green"
@@ -193,6 +212,10 @@ blackAttr = attrName "black"
 whiteAttr = attrName "white"
 victoryAttr = attrName "victory"
 loseAttr = attrName "lose"
+easyAttr = attrName "easy"
+medAttr = attrName "med"
+hardAttr = attrName "hard"
+
 
 attributeMap :: AttrMap
 attributeMap = attrMap
@@ -207,5 +230,8 @@ attributeMap = attrMap
     (blackAttr, bg V.black),
     (whiteAttr, bg V.white),
     (victoryAttr, fg V.green),
-    (loseAttr, fg V.red)
+    (loseAttr, fg V.red),
+    (easyAttr, fg V.green),
+    (medAttr, fg $ V.rgbColor 255 255 0),
+    (hardAttr, fg V.red)
   ]
