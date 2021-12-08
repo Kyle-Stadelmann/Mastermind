@@ -35,32 +35,10 @@ generateColorNoDupes allColors currColors =
 generateHints :: Code -> Board -> Int -> Hints -> Hints
 generateHints code b row currHints = insertHintRow currHints hintList row
   where
-    hintList         = [getHintByPos hintCounts row col | col <- [1..cols]]
-    hintCounts       = foldr countHintTypes (0,0,0) hintListUnsorted
-    hintListUnsorted = [generateHint code b row col | col <- [1..cols]]
-
-generateHint :: Code -> Board -> Int -> Int -> Hint
-generateHint code b row col = 
-  case actualColorMaybe of
-    Nothing           -> Incorrect
-    Just actualColor  -> compareWithCode code actualColor col
-  where
-    actualColorMaybe   = (boardLookup b (Pos row col))
-
-compareWithCode :: Code -> Color -> Int -> Hint
-compareWithCode code color col
-  | color == expectedColor = ColorPos
-  | colorInCode code color = Color
-  | True                   = Incorrect
-  where
-    -- minus 1 because we are 1-based indexing for pos
-    expectedColor = (code !! (col-1))
-
--- Returns count of (ColorPos, Color, Incorrect) tuple
-countHintTypes :: Hint -> (Int, Int, Int) -> (Int, Int, Int)
-countHintTypes ColorPos  (cp,c,i) = (cp+1,c,i)
-countHintTypes Color     (cp,c,i) = (cp,c+1,i)
-countHintTypes Incorrect (cp,c,i) = (cp,c,i+1)
+    hintList    = [getHintByPos hintCounts row col | col <- [1..cols]]
+    hintCounts  = countHintTypes code colors
+    colors      = map (\maybeColor -> maybeColorToColor maybeColor) maybeColors
+    maybeColors = [boardLookup b (Pos row col) | col <- [1..cols]]
 
 -- Inserts hints based off (ColorPos, Color, Incorrect) tuple
 getHintByPos :: (Int, Int, Int) -> Int -> Int -> Hint
@@ -68,6 +46,44 @@ getHintByPos (cp,c,i) row col
   | cp >= col       = ColorPos
   | (cp + c) >= col = Color
   | True            = Incorrect
+
+countHintTypes :: Code -> [Color] -> (Int, Int, Int)
+countHintTypes code colors = (colorPosCount, colorCount, incorrectCount)
+  where
+    incorrectCount = cols - colorCount - colorPosCount
+    (colorCount,_) = countColor codeColors' colors
+    (colorPosCount,codeColors') = countColorPos codeColors colors
+    codeColors = map (\col -> code !! col) [0..cols-1]
+
+
+countColor :: [Color] -> [Color] -> (Int, [Color])
+countColor code colors = countColorHelper (0,code) colors
+
+countColorHelper :: (Int, [Color]) -> [Color] -> (Int, [Color])
+countColorHelper carry [] = carry
+countColorHelper (count,code) (color:colors) = countColorHelper (count', code') colors
+  where
+    (count', code') = if elem color code
+                               then (count+1, deleteElem color code)
+                               else (count, code)
+
+countColorPos :: [Color] -> [Color] -> (Int, [Color])
+countColorPos code colors = countColorPosHelper (0,[]) code colors
+
+countColorPosHelper :: (Int, [Color]) -> [Color] -> [Color] -> (Int, [Color])
+countColorPosHelper carry _ [] = carry 
+countColorPosHelper (count, carryColors) (code:codes) (color:colors) = countColorPosHelper (count', carryColors') codes colors
+  where
+    (count', carryColors') = if code == color
+                               then (count+1, carryColors)
+                               else (count, code:carryColors)
+
+
+deleteElem :: Eq a => a -> [a] -> [a]
+deleteElem element [] = []
+deleteElem element (a:as) = if a == element
+                            then as
+                            else [a] ++ deleteElem element as
 
 -- >>> [generateHint [Orange,Yellow,Blue,Pink] (M.insert (Pos 1 1) Yellow (M.insert (Pos 1 2) Orange (M.insert (Pos 1 3) Blue (M.insert (Pos 1 4) Pink M.empty)))) 1 col | col <- [1..cols]]
 -- [Color,Color,ColorPos,ColorPos]
@@ -100,5 +116,8 @@ isRowCorrect code b row col =
     then isRowCorrect code b row (col+1)
     else False
   where
-    correct = hint == ColorPos
-    hint    = generateHint code b row col
+    correct    = case maybeColor of
+                  Nothing -> False
+                  Just color -> color == codeColor
+    maybeColor = boardLookup b (Pos row col)
+    codeColor  = code !! (col-1)

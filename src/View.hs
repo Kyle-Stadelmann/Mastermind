@@ -39,13 +39,15 @@ makePlayerRow s r = padLeftRight 1 $ border $ hBox [padLeftRight 1 (makePeg s r 
 
 makePeg :: PlayState -> Int -> Int -> Widget n
 makePeg s r c  
-  | isCurr s r c = withCursor raw
+  | isCurr s r c && (not gameOver) = withCursor raw
   | otherwise    = raw
   where
     raw        = makeColorPeg maybeColor
     maybeColor = boardLookup board pos
     pos        = Pos r c
     board      = psBoard s
+    gameOver   = result == (Just Win) || result == (Just Lose)
+    result     = psResult s
 
 makeColorPeg :: Maybe B.Color -> Widget n
 makeColorPeg maybeColor = border $ withAttr (colorToAttr color) peg

@@ -46,10 +46,9 @@ inputCharKey s key = case maybeColor of
 inputEnterKey :: PlayState -> EventM n (Next PlayState)
 inputEnterKey s = 
   case result of
-    Just winlose ->
+    Just _ ->
       let s' = s {psResult = result} 
       in
-      -- display victory screen
       Brick.continue s'
     Nothing ->
       -- generate hints
@@ -65,35 +64,3 @@ inputEnterKey s =
     code   = psCode s
     turn   = psTurn s
     hints  = psHints s
-
-
-{-
--------------------------------------------------------------------------------
-
-control :: PlayState -> BrickEvent n Tick -> EventM n (Next PlayState)
-control s ev = case ev of 
-  AppEvent Tick                   -> nextS s =<< liftIO (play O s)
-  T.VtyEvent (V.EvKey V.KEnter _) -> nextS s =<< liftIO (play X s)
-
--------------------------------------------------------------------------------
-play :: XO -> PlayState -> IO (Result Board)
--------------------------------------------------------------------------------
-play xo s
-  | psTurn s == xo = put (psBoard s) xo <$> getPos xo s 
-  | otherwise      = return Retry
-
-getPos :: XO -> PlayState -> IO Pos
-getPos xo s = getStrategy xo s (psPos s) (psBoard s) xo
-
-getStrategy :: XO -> PlayState -> Strategy 
-getStrategy X s = plStrat (psX s)
-getStrategy O s = plStrat (psO s)
-
--------------------------------------------------------------------------------
-nextS :: PlayState -> Result Board -> EventM n (Next PlayState)
--------------------------------------------------------------------------------
-nextS s b = case next s b of
-  Right s' -> continue s'
-  Left res -> halt (s { psResult = res }) 
--}
-

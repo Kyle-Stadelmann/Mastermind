@@ -80,6 +80,11 @@ insertHintRow currHints (h:hs) row = insertHintRow (M.insert pos h currHints) hs
 insertHint :: Hints -> Pos -> Hint -> Hints
 insertHint hs p h = M.insert p h hs
 
+-- Takes a maybe color and returns either the value or defaultColor if there is no value
+maybeColorToColor :: Maybe Color -> Color
+maybeColorToColor (Just v) = v
+maybeColorToColor Nothing = defaultColor
+
 -------------------------------------------------------------------------------
 -- | Constants ----------------------------------------------------------------
 -------------------------------------------------------------------------------
