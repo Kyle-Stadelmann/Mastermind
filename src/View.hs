@@ -96,11 +96,11 @@ hiddenCodePeg = str "??"
 -------------------------------------------------------------------------------
 makeLeftHalfHintRow :: PlayState -> Int -> Widget n
 makeLeftHalfHintRow s r = padRight (Pad 2) $ border
-                          $ hBox [(makeHintPeg s r c) | c <- [cols,cols-1..(cols `div` 2 + 1)]]
+                          $ hBox [(makeHintPeg s r c) | c <- [1..cols `div` 2]]
 
 makeRightHalfHintRow :: PlayState -> Int -> Widget n
 makeRightHalfHintRow s r = padLeft (Pad 2) $ border
-                            $ hBox [(makeHintPeg s r c) | c <- [cols `div` 2,(cols `div` 2)-1..1]]
+                            $ hBox [(makeHintPeg s r c) | c <- [(cols `div` 2 + 1)..cols]]
 
 makeHintPeg :: PlayState -> Int -> Int -> Widget n
 makeHintPeg s r c = makeColorPeg color
