@@ -69,8 +69,12 @@ getHintByPos (cp,c,i) row col
   | (cp + c) >= col = Color
   | True            = Incorrect
 
--- >>> [generateHint [Blue,Green,Red,Orange] (M.insert (Pos 1 1) Blue (M.empty)) 1 col | col <- [1..cols]]
--- [ColorPos,Incorrect,Incorrect,Incorrect]
+-- >>> [generateHint [Orange,Yellow,Blue,Pink] (M.insert (Pos 1 1) Yellow (M.insert (Pos 1 2) Orange (M.insert (Pos 1 3) Blue (M.insert (Pos 1 4) Pink M.empty)))) 1 col | col <- [1..cols]]
+-- [Color,Color,ColorPos,ColorPos]
+--
+
+-- >>> generateHints [Orange,Yellow,Blue,Pink] (M.insert (Pos 1 1) Yellow (M.insert (Pos 1 2) Orange (M.insert (Pos 1 3) Blue (M.insert (Pos 1 4) Pink M.empty)))) 1 M.empty
+-- fromList [(Pos {pRow = 1, pCol = 1},ColorPos),(Pos {pRow = 1, pCol = 2},ColorPos),(Pos {pRow = 1, pCol = 3},Color),(Pos {pRow = 1, pCol = 4},Color)]
 --
 
 -- >>> compareWithCode [Blue,Green,Red,Orange] Blue 1

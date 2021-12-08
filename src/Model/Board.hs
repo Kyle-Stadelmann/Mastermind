@@ -28,7 +28,7 @@ data Pos = Pos
   { pRow :: Int  -- 1 <= pRow <= rows 
   , pCol :: Int  -- 1 <= pCol <= cols
   }
-  deriving (Eq, Ord)
+  deriving (Eq, Ord, Show)
 
 -- Correct color and pos | correct color | both incorrect
 data Hint = ColorPos | Color | Incorrect
@@ -75,8 +75,7 @@ insertHintRow currHints []     _   = currHints
 insertHintRow currHints (h:hs) row = insertHintRow (M.insert pos h currHints) hs row
   where
     pos = Pos row col
-    -- plus 1 since we are doing 1-based indexing
-    col = (cols - (length hs)) + 1
+    col = (cols - (length hs))
 
 insertHint :: Hints -> Pos -> Hint -> Hints
 insertHint hs p h = M.insert p h hs
