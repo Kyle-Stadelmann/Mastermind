@@ -1,14 +1,13 @@
 module Model.Computer where
 
 import Model.Board
-import System.Random -- (Random(randomRIO))
-import System.IO.Unsafe (unsafePerformIO)
+import System.Random
 
 -------------------------------------------------------------------------------
 -- | Helper functions taken by opponent player (computer) ---------------------
 -------------------------------------------------------------------------------
-generateCode :: Code
-generateCode = unsafePerformIO (generateCodeHelper colors [] cols)
+generateCode :: Int -> IO Code
+generateCode numColors = generateCodeHelper colors [] numColors
   where
     colors = allColors
 
@@ -23,7 +22,7 @@ generateCodeHelper allColors currColors numColors =
 generateColorNoDupes :: [Color] -> [Color] -> IO [Color]
 generateColorNoDupes allColors currColors = 
   do
-    colorIndex <- randomRIO (0, length allColors - 1)
+    colorIndex <- getStdRandom $ randomR (0, length allColors - 1)
     let color = allColors !! colorIndex
     if elem color currColors
       then generateColorNoDupes allColors currColors

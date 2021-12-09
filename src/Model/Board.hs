@@ -43,6 +43,9 @@ data Difficulty
   = Easy | Medium | Hard
   deriving (Eq, Show)
 
+data Stream a = a :| Stream a
+  deriving (Show)
+
 -------------------------------------------------------------------------------
 -- | Helper functions ---------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -100,6 +103,10 @@ cols = 4
 
 rows :: Int
 rows = 10
+
+-- how fast the cursor changes from highlighted to not highlighted (in ticks)
+cursorSpeed :: Int
+cursorSpeed = 10
 
 -- Default color of empty hint and main pegs
 defaultColor :: Color

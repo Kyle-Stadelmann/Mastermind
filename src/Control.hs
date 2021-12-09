@@ -9,10 +9,13 @@ import Model.Board
 import Model.Computer
 
 import Data.Map as M
+import System.IO.Unsafe (unsafePerformIO)
 
 control :: PlayState -> BrickEvent n Tick -> EventM n (Next PlayState)
 control s ev = case ev of 
+  T.AppEvent ticks                      -> Brick.continue $ handleTick s
   T.VtyEvent (V.EvKey V.KEnter _)       -> inputEnterKey s
+  T.VtyEvent (V.EvKey (V.KChar 'm') _)  -> Brick.continue $ s {psCode = unsafePerformIO $ generateCode 4}
   T.VtyEvent (V.EvKey (V.KChar '-') _)  -> Brick.continue $ toggleDifficulty s
   T.VtyEvent (V.EvKey (V.KChar '=') _)  -> Brick.continue $ newGame s
   T.VtyEvent (V.EvKey (V.KChar key) _)  -> inputCharKey s key
@@ -65,3 +68,8 @@ inputEnterKey s =
     code   = psCode s
     turn   = psTurn s
     hints  = psHints s
+
+handleTick :: PlayState -> PlayState
+handleTick s = s {psTicks = ticks + 1}
+  where
+    ticks = psTicks s

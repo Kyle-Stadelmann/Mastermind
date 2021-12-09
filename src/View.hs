@@ -36,7 +36,7 @@ makePlayerRow s r = padLeftRight 1 $ border $ hBox [padLeftRight 1 (makePeg s r 
 
 makePeg :: PlayState -> Int -> Int -> Widget n
 makePeg s r c  
-  | isCurr s r c && (not gameOver) = withCursor raw
+  | isCurr s r c && (not gameOver) = withCursor s raw
   | otherwise    = raw
   where
     raw        = makeColorPeg maybeColor
@@ -130,8 +130,11 @@ makeCodePeg s c = peg
     peg   = case maybeResult of
                     -- Game over; display the previously hidden code
                     Just _  -> makeColorPeg (maybeColor)
-                    -- Active game still going; no result yet; display hiddenCodePeg
-                    Nothing -> border $ withAttr (colorToAttr Black) hiddenCodePeg
+                    Nothing -> if debugMode
+                                -- Debug mode on, display hidden code
+                                then makeColorPeg (maybeColor)
+                                -- Active game still going; no result yet; display hiddenCodePeg
+                                else border $ withAttr (colorToAttr Black) hiddenCodePeg
     maybeResult = psResult s
     code = psCode s
     maybeColor = Just (code !! c)
@@ -176,8 +179,13 @@ availHeader = "Available Colors"
 controlHeader :: String
 controlHeader = "Controls"
 
-withCursor :: Widget n -> Widget n
-withCursor = modifyDefAttr (`withStyle` reverseVideo)
+withCursor :: PlayState -> Widget n -> Widget n
+withCursor s w = if displayCursor
+                  then modifyDefAttr (`withStyle` reverseVideo) $ w
+                  else w
+  where
+    displayCursor = (ticks `mod` cursorSpeed) < (cursorSpeed `div` 2)
+    ticks = psTicks s
 
 -------------------------------------------------------------------------------
 -- | Attribute mappings  ------------------------------------------------------
