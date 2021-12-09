@@ -23,7 +23,7 @@ viewHelper s = (padRight (Pad 8) makeAvailColors)
 -- | Main board ---------------------------------------------------------------
 -------------------------------------------------------------------------------
 makeMainBoardWithBorder :: PlayState -> Widget n
-makeMainBoardWithBorder s = ((borderWithLabel (str (mainHeader s))) $ (makeMainBoard s))
+makeMainBoardWithBorder s = ((borderWithLabel (str mainHeader)) $ (makeMainBoard s))
 
 makeMainBoard :: PlayState -> Widget n
 makeMainBoard s = vBox $ (makeCodeRow s):[makeRow s row | row <- [rows,rows-1..1]]
@@ -33,6 +33,8 @@ makeRow s r = makeLeftHalfHintRow s r <+> makePlayerRow s r <+> makeRightHalfHin
 
 makePlayerRow :: PlayState -> Int -> Widget n
 makePlayerRow s r = padLeftRight 1 $ border $ hBox [padLeftRight 1 (makePeg s r c) | c <- [1..cols]]
+  where
+    cols = determineCols (psDifficulty s)
 
 makePeg :: PlayState -> Int -> Int -> Widget n
 makePeg s r c  
@@ -88,13 +90,13 @@ makeControlBox :: Widget n
 makeControlBox = borderWithLabel (str controlHeader) $ makeControls
 
 makeControls :: Widget n
-makeControls = hLimit 30
+makeControls = hLimit 36
                $ vBox ([ makeControl "Left" "←"
                        , makeControl "Right" "→"
                        , makeControl "End turn" "Enter"
                        , makeControl "End game" "Esc"
                        , makeControl "New game" "="
-                       , makeControl "Toggle Next Game Difficulty" "-"
+                       , makeControl "Change Difficulty (ends game)" "-"
                        ]
                        ++ colorControls
                       )
@@ -109,13 +111,20 @@ makeControl function key = str function
 -- | Difficulty box -----------------------------------------------------------
 -------------------------------------------------------------------------------
 makeDifficultyBox :: PlayState -> Widget n
-makeDifficultyBox s = hLimit 32
+makeDifficultyBox s = hLimit 38
                       $ borderWithLabel (str "Difficulty")
-                      $ hCenter widgetDiff
+                      $ hCenter widgetDiff 
+                      <=> description
   where
     widgetDiff = withAttr (difficultyToAttr diff) (str $ show diff)
+    description = vBox [ makeDifficultySetting diff "Number of code pegs: " (show $ determineCols diff)
+                       , makeDifficultySetting diff "Allow duplicates: " (show $ determineAllowDupes diff)
+                       ]
     diff = psDifficulty s
 
+makeDifficultySetting :: Difficulty -> String -> String -> Widget n
+makeDifficultySetting diff setting value = str setting
+                                           <+> (padLeft Max $ withAttr (difficultyToAttr diff) $ str value)
 -------------------------------------------------------------------------------
 -- | Secret code row ----------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -123,6 +132,8 @@ makeCodeRow :: PlayState -> Widget n
 makeCodeRow s = padAll 2 (str "Hints")
                 <+> (padLeftRight 4 (border $ hBox [padLeftRight 1 (makeCodePeg s c) | c <- [0..cols-1]]))
                 <+> padAll 2 (str "Hints")
+  where
+    cols = determineCols (psDifficulty s)
 
 makeCodePeg :: PlayState -> Int -> Widget n
 makeCodePeg s c = peg
@@ -149,10 +160,14 @@ hiddenCodePeg = str "??"
 makeLeftHalfHintRow :: PlayState -> Int -> Widget n
 makeLeftHalfHintRow s r = padRight (Pad 2) $ border
                           $ hBox [(makeHintPeg s r c) | c <- [1..cols `div` 2]]
+  where
+    cols = determineCols (psDifficulty s)
 
 makeRightHalfHintRow :: PlayState -> Int -> Widget n
 makeRightHalfHintRow s r = padLeft (Pad 2) $ border
                             $ hBox [(makeHintPeg s r c) | c <- [(cols `div` 2 + 1)..cols]]
+  where
+    cols = determineCols (psDifficulty s)
 
 makeHintPeg :: PlayState -> Int -> Int -> Widget n
 makeHintPeg s r c = makeColorPeg color
@@ -168,10 +183,8 @@ makeHintPeg s r c = makeColorPeg color
 -------------------------------------------------------------------------------
 -- | Util ---------------------------------------------------------------------
 -------------------------------------------------------------------------------
-mainHeader :: PlayState -> String
-mainHeader s = printf "Mastermind Turn = %s, row = %d, col = %d" (show (psTurn s)) (pRow p) (pCol p)
-  where 
-    p    = psPos s
+mainHeader :: String
+mainHeader = printf "Mastermind"
 
 availHeader :: String
 availHeader = "Available Colors"
@@ -197,6 +210,7 @@ colorToAttr Green = greenAttr
 colorToAttr Red = redAttr
 colorToAttr Yellow = yellowAttr
 colorToAttr Pink = pinkAttr
+colorToAttr Cyan = cyanAttr
 colorToAttr White = whiteAttr
 colorToAttr Black = blackAttr
 
@@ -209,13 +223,14 @@ difficultyToAttr Hard = hardAttr
 -------------------------------------------------------------------------------
 -- | Attributes ---------------------------------------------------------------
 -------------------------------------------------------------------------------
-blueAttr, orangeAttr, greenAttr, redAttr, yellowAttr, pinkAttr, blackAttr, whiteAttr, victoryAttr, loseAttr, easyAttr, medAttr, hardAttr :: AttrName
+blueAttr, orangeAttr, greenAttr, redAttr, yellowAttr, pinkAttr, cyanAttr, blackAttr, whiteAttr, victoryAttr, loseAttr, easyAttr, medAttr, hardAttr :: AttrName
 blueAttr = attrName "blue"
 orangeAttr = attrName "orange"
 greenAttr = attrName "green"
 redAttr = attrName "red"
 yellowAttr = attrName "yellow"
 pinkAttr = attrName "pink"
+cyanAttr = attrName "cyan"
 blackAttr = attrName "black"
 whiteAttr = attrName "white"
 victoryAttr = attrName "victory"
@@ -235,6 +250,7 @@ attributeMap = attrMap
     (redAttr, bg V.red),
     (yellowAttr, bg $ V.rgbColor 255 255 0),
     (pinkAttr, bg $ V.rgbColor 255 153 255),
+    (cyanAttr, bg $ V.rgbColor 0 255 255),
     (blackAttr, bg V.black),
     (whiteAttr, bg V.white),
     (victoryAttr, fg V.green),

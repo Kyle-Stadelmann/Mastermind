@@ -6,36 +6,36 @@ import System.Random
 -------------------------------------------------------------------------------
 -- | Helper functions taken by opponent player (computer) ---------------------
 -------------------------------------------------------------------------------
-generateCode :: Int -> IO Code
-generateCode numColors = generateCodeHelper colors [] numColors
+generateCode :: Bool -> Int -> IO Code
+generateCode allowDupes numColors = generateCodeHelper allowDupes colors [] numColors
   where
     colors = allColors
 
-generateCodeHelper :: [Color] -> [Color] -> Int -> IO [Color]
-generateCodeHelper _ currColors 0 = return currColors
-generateCodeHelper allColors currColors numColors = 
+generateCodeHelper :: Bool -> [Color] -> [Color] -> Int -> IO [Color]
+generateCodeHelper _          _ currColors 0 = return currColors
+generateCodeHelper allowDupes allColors currColors numColors = 
   do
-    newCurrColors <- generateColorNoDupes allColors currColors
-    generateCodeHelper allColors newCurrColors (numColors - 1)
+    newCurrColors <- generateColor allowDupes allColors currColors
+    generateCodeHelper allowDupes allColors newCurrColors (numColors - 1)
 
 
-generateColorNoDupes :: [Color] -> [Color] -> IO [Color]
-generateColorNoDupes allColors currColors = 
+generateColor :: Bool -> [Color] -> [Color] -> IO [Color]
+generateColor allowDupes allColors currColors = 
   do
     colorIndex <- getStdRandom $ randomR (0, length allColors - 1)
     let color = allColors !! colorIndex
-    if elem color currColors
-      then generateColorNoDupes allColors currColors
+    if allowDupes == False && elem color currColors
+      then generateColor allowDupes allColors currColors
       else return (color : currColors)
 
 -------------------------------------------------------------------------------
 -- | Logic functions ----------------------------------------------------------
 -------------------------------------------------------------------------------
-generateHints :: Code -> Board -> Int -> Hints -> Hints
-generateHints code b row currHints = insertHintRow currHints hintList row
+generateHints :: Int -> Code -> Board -> Int -> Hints -> Hints
+generateHints cols code b row currHints = insertHintRow cols currHints hintList row
   where
     hintList    = [getHintByPos hintCounts row col | col <- [1..cols]]
-    hintCounts  = countHintTypes code colors
+    hintCounts  = countHintTypes cols code colors
     colors      = map (\maybeColor -> maybeColorToColor maybeColor) maybeColors
     maybeColors = [boardLookup b (Pos row col) | col <- [1..cols]]
 
@@ -46,12 +46,12 @@ getHintByPos (cp,c,i) row col
   | (cp + c) >= col = Color
   | True            = Incorrect
 
-countHintTypes :: Code -> [Color] -> (Int, Int, Int)
-countHintTypes code colors = (colorPosCount, colorCount, incorrectCount)
+countHintTypes :: Int -> Code -> [Color] -> (Int, Int, Int)
+countHintTypes cols code colors = (colorPosCount, colorCount, incorrectCount)
   where
     incorrectCount = cols - colorCount - colorPosCount
-    (colorCount,_) = countColor codeColors' colors
-    (colorPosCount,codeColors') = countColorPos codeColors colors
+    (colorCount,_) = countColor codeColors' carryColors'
+    (colorPosCount,codeColors',carryColors') = countColorPos codeColors colors
     codeColors = map (\col -> code !! col) [0..cols-1]
 
 
@@ -66,16 +66,16 @@ countColorHelper (count,code) (color:colors) = countColorHelper (count', code') 
                                then (count+1, deleteElem color code)
                                else (count, code)
 
-countColorPos :: [Color] -> [Color] -> (Int, [Color])
-countColorPos code colors = countColorPosHelper (0,[]) code colors
+countColorPos :: [Color] -> [Color] -> (Int, [Color], [Color])
+countColorPos code colors = countColorPosHelper (0,[],[]) code colors
 
-countColorPosHelper :: (Int, [Color]) -> [Color] -> [Color] -> (Int, [Color])
+countColorPosHelper :: (Int, [Color], [Color]) -> [Color] -> [Color] -> (Int, [Color], [Color])
 countColorPosHelper carry _ [] = carry 
-countColorPosHelper (count, carryColors) (code:codes) (color:colors) = countColorPosHelper (count', carryColors') codes colors
+countColorPosHelper (count, carryCode, carryColors) (code:codes) (color:colors) = countColorPosHelper (count', carryCode', carryColors') codes colors
   where
-    (count', carryColors') = if code == color
-                               then (count+1, carryColors)
-                               else (count, code:carryColors)
+    (count', carryCode', carryColors') = if code == color
+                                           then (count+1, carryCode,      carryColors)
+                                           else (count,   code:carryCode, color:carryColors)
 
 
 deleteElem :: Eq a => a -> [a] -> [a]
@@ -97,22 +97,22 @@ deleteElem element (a:as) = if a == element
 --
 
 
-interpretResult :: Code -> Board -> Int -> Maybe Result
-interpretResult c b turn = 
+interpretResult :: Int -> Code -> Board -> Int -> Maybe Result
+interpretResult cols c b turn = 
   if correctness
     then Just Win
     else if isLastTurn
       then Just Lose
       else Nothing
   where
-    correctness = isRowCorrect c b turn 1
+    correctness = isRowCorrect c b turn cols
     isLastTurn  = turn == rows
 
 isRowCorrect :: Code -> Board -> Int -> Int -> Bool
-isRowCorrect _ _ _   5 = True
+isRowCorrect _    _ _   0   = True
 isRowCorrect code b row col = 
   if correct
-    then isRowCorrect code b row (col+1)
+    then isRowCorrect code b row (col-1)
     else False
   where
     correct    = case maybeColor of

@@ -33,7 +33,7 @@ data PlayState = PS
 init :: IO PlayState
 init = 
   do 
-    code <- generateCode Board.cols
+    code <- generateCode (Board.determineAllowDupes Board.defaultDiff) Board.defaultCols
     let ps = PS 
               { psCode       = code
               , psTurn       = 1
@@ -52,6 +52,7 @@ isCurr s r c = Board.pRow p == r && Board.pCol p == c
     p = psPos s 
 
 -- Move to next difficulty
+-- ends the game, starts a new one with new difficulty
 toggleDifficulty :: PlayState -> PlayState
 toggleDifficulty s = s {psDifficulty = diff'}
   where

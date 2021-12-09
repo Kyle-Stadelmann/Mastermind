@@ -15,14 +15,20 @@ control :: PlayState -> BrickEvent n Tick -> EventM n (Next PlayState)
 control s ev = case ev of 
   T.AppEvent _                          -> Brick.continue $ handleTick s
   T.VtyEvent (V.EvKey V.KEnter _)       -> inputEnterKey s
-  --T.VtyEvent (V.EvKey (V.KChar 'm') _)  -> Brick.continue $ s {psCode = unsafePerformIO $ generateCode 4}
-  T.VtyEvent (V.EvKey (V.KChar '-') _)  -> Brick.continue $ toggleDifficulty s
-  T.VtyEvent (V.EvKey (V.KChar '=') _)  -> newGame s =<< liftIO (generateCode cols)
+  T.VtyEvent (V.EvKey (V.KChar '=') _)  -> newGame s =<< liftIO (generateCode (determineAllowDupes diff) cols)
+  T.VtyEvent (V.EvKey (V.KChar '-') _)  -> let s'  = toggleDifficulty s 
+                                               diff' = psDifficulty s'
+                                               cols' = determineCols diff'
+                                           in
+                                           newGame s' =<< liftIO (generateCode (determineAllowDupes diff') cols')
   T.VtyEvent (V.EvKey (V.KChar key) _)  -> inputCharKey s key
   T.VtyEvent (V.EvKey V.KLeft _)        -> Brick.continue (move left  s)
-  T.VtyEvent (V.EvKey V.KRight _)       -> Brick.continue (move right s)
+  T.VtyEvent (V.EvKey V.KRight _)       -> Brick.continue (move (right cols) s)
   T.VtyEvent (V.EvKey V.KEsc _)         -> Brick.halt s
   _                                     -> Brick.continue s
+  where
+    diff = psDifficulty s
+    cols = determineCols diff
 
 -------------------------------------------------------------------------------
 move :: (Pos -> Pos) -> PlayState -> PlayState
@@ -51,23 +57,25 @@ inputEnterKey :: PlayState -> EventM n (Next PlayState)
 inputEnterKey s = 
   case result of
     Just _ ->
-      let hints' = generateHints code board turn hints 
+      let hints' = generateHints cols code board turn hints 
       in
       Brick.continue s {psHints = hints', psResult = result}
     Nothing ->
       -- generate hints
       let turn'  = turn + 1 
           pos'   = Pos turn' 1
-          hints' = generateHints code board turn hints
+          hints' = generateHints cols code board turn hints
       in    
       Brick.continue (s {psTurn = turn', psPos = pos', psHints = hints'})
 
   where
-    result = interpretResult code board turn
+    result = interpretResult cols code board turn
     board  = psBoard s
     code   = psCode s
     turn   = psTurn s
     hints  = psHints s
+    cols   = determineCols diff
+    diff   = psDifficulty s
 
 handleTick :: PlayState -> PlayState
 handleTick s = s {psTicks = ticks + 1}
