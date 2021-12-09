@@ -7,22 +7,22 @@ import qualified Brick.Types as T
 import Model
 import Model.Board
 import Model.Computer
+import Control.Monad.IO.Class (MonadIO(liftIO))
 
 import Data.Map as M
-import System.IO.Unsafe (unsafePerformIO)
 
 control :: PlayState -> BrickEvent n Tick -> EventM n (Next PlayState)
 control s ev = case ev of 
-  T.AppEvent ticks                      -> Brick.continue $ handleTick s
+  T.AppEvent _                          -> Brick.continue $ handleTick s
   T.VtyEvent (V.EvKey V.KEnter _)       -> inputEnterKey s
-  T.VtyEvent (V.EvKey (V.KChar 'm') _)  -> Brick.continue $ s {psCode = unsafePerformIO $ generateCode 4}
+  --T.VtyEvent (V.EvKey (V.KChar 'm') _)  -> Brick.continue $ s {psCode = unsafePerformIO $ generateCode 4}
   T.VtyEvent (V.EvKey (V.KChar '-') _)  -> Brick.continue $ toggleDifficulty s
-  T.VtyEvent (V.EvKey (V.KChar '=') _)  -> Brick.continue $ newGame s
+  T.VtyEvent (V.EvKey (V.KChar '=') _)  -> newGame s =<< liftIO (generateCode cols)
   T.VtyEvent (V.EvKey (V.KChar key) _)  -> inputCharKey s key
   T.VtyEvent (V.EvKey V.KLeft _)        -> Brick.continue (move left  s)
   T.VtyEvent (V.EvKey V.KRight _)       -> Brick.continue (move right s)
   T.VtyEvent (V.EvKey V.KEsc _)         -> Brick.halt s
-  _                                     -> Brick.continue s -- Brick.halt s
+  _                                     -> Brick.continue s
 
 -------------------------------------------------------------------------------
 move :: (Pos -> Pos) -> PlayState -> PlayState
@@ -73,3 +73,18 @@ handleTick :: PlayState -> PlayState
 handleTick s = s {psTicks = ticks + 1}
   where
     ticks = psTicks s
+
+-- Init all but the difficulty, and generate a new code
+newGame :: PlayState -> Code -> EventM n (Next PlayState)
+newGame s newCode = Brick.continue s'
+  where 
+    s'         = PS { psCode       = newCode
+                    , psTurn       = 1
+                    , psBoard      = initBoard
+                    , psPos        = Pos 1 1 
+                    , psHints      = initHints
+                    , psResult     = Nothing
+                    , psDifficulty = difficulty
+                    , psTicks      = 0
+                    }
+    difficulty = psDifficulty s

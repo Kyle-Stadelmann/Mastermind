@@ -3,7 +3,6 @@ module Model where
 import Prelude hiding ((!!))
 import qualified Model.Board as Board
 import Model.Computer
-import System.IO.Unsafe (unsafePerformIO)
 
 -------------------------------------------------------------------------------
 -- | Ticks mark passing of time: a custom event that we constantly stream
@@ -20,8 +19,7 @@ data State
   | Outro 
   
 data PlayState = PS
-  { psCodeStream :: Stream Board.Code     -- Infinite stream of codes, for future games
-  , psCode       :: Board.Code            -- generated answer color code
+  { psCode       :: Board.Code            -- generated answer color code
   , psTurn       :: Int                   -- what turn we are on (current row)
   , psBoard      :: Board.Board           -- current board (player rows)
   , psPos        :: Board.Pos             -- current cursor (within the current row)
@@ -33,29 +31,25 @@ data PlayState = PS
 
 
 init :: IO PlayState
-init = PS 
-  { psCodeStream = 
-  , psCode       = unsafePerformIO $ generateCode Board.cols
-  , psTurn       = 1
-  , psBoard      = Board.initBoard
-  , psPos        = Board.Pos 1 1 
-  , psHints      = Board.initHints
-  , psResult     = Nothing
-  , psDifficulty = Board.Easy
-  , psTicks      = 0
-  }
+init = 
+  do 
+    code <- generateCode Board.cols
+    let ps = PS 
+              { psCode       = code
+              , psTurn       = 1
+              , psBoard      = Board.initBoard
+              , psPos        = Board.Pos 1 1 
+              , psHints      = Board.initHints
+              , psResult     = Nothing
+              , psDifficulty = Board.Easy
+              , psTicks      = 0
+              }
+    return ps
 
 isCurr :: PlayState -> Int -> Int -> Bool
 isCurr s r c = Board.pRow p == r && Board.pCol p == c
   where 
     p = psPos s 
-
--- Init all but the difficulty, newcode
-newGame :: PlayState -> PlayState
-newGame s = Model.init {psDifficulty = difficulty, psCode = newCode}
-  where 
-    difficulty = psDifficulty s
-    newCode    = unsafePerformIO $ generateCode Board.cols
 
 -- Move to next difficulty
 toggleDifficulty :: PlayState -> PlayState
