@@ -19,7 +19,7 @@ I planned the following schedule (around other responsibilities) to keep myself 
 | Game logic functions: generate code + generate key pegs based off input    | 11/27/21      |     ✔
 | Game logic functions: increment round                                      | 12/1/21       |     ✔
 | Wrap up: confirm easy installation on other environments, unit tests, etc. | 12/4/21       |
-| Stretch/secondary goals: win/lose screens, restart buttons, etc.           | 12/7/21       |
+| Stretch/secondary goals: win/lose screens, restart buttons, etc.           | 12/7/21       |     ✔
 | Prepare for presentation                                                   | 12/9/21       |
 
 ## Goals
