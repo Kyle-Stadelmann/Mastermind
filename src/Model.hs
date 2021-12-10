@@ -1,7 +1,7 @@
 module Model where
 
 import Prelude hiding ((!!))
-import qualified Model.Board as Board
+import Model.Board
 import Model.Computer
 
 -------------------------------------------------------------------------------
@@ -19,13 +19,13 @@ data State
   | Outro 
   
 data PlayState = PS
-  { psCode       :: Board.Code            -- generated answer color code
+  { psCode       :: Code            -- generated answer color code
   , psTurn       :: Int                   -- what turn we are on (current row)
-  , psBoard      :: Board.Board           -- current board (player rows)
-  , psPos        :: Board.Pos             -- current cursor (within the current row)
-  , psHints      :: Board.Hints           -- current hints given thus far
-  , psResult     :: Maybe Board.Result    -- game result
-  , psDifficulty :: Board.Difficulty      -- game difficulty
+  , psBoard      :: Board           -- current board (player rows)
+  , psPos        :: Pos             -- current cursor (within the current row)
+  , psHints      :: Hints           -- current hints given thus far
+  , psResult     :: Maybe Result    -- game result
+  , psDifficulty :: Difficulty      -- game difficulty
   , psTicks      :: Int                   -- how many ticks have passed since game started
   } 
 
@@ -33,21 +33,21 @@ data PlayState = PS
 init :: IO PlayState
 init = 
   do 
-    code <- generateCode (Board.determineAllowDupes Board.defaultDiff) Board.defaultCols
+    code <- generateCode (determineAllowDupes defaultDiff) defaultCols
     let ps = PS 
               { psCode       = code
               , psTurn       = 1
-              , psBoard      = Board.initBoard
-              , psPos        = Board.Pos 1 1 
-              , psHints      = Board.initHints
+              , psBoard      = initBoard
+              , psPos        = Pos 1 1 
+              , psHints      = initHints
               , psResult     = Nothing
-              , psDifficulty = Board.Easy
+              , psDifficulty = Easy
               , psTicks      = 0
               }
     return ps
 
 isCurr :: PlayState -> Int -> Int -> Bool
-isCurr s r c = Board.pRow p == r && Board.pCol p == c
+isCurr s r c = pRow p == r && pCol p == c
   where 
     p = psPos s 
 
@@ -57,10 +57,10 @@ toggleDifficulty :: PlayState -> PlayState
 toggleDifficulty s = s {psDifficulty = diff'}
   where
     diff' = case diff of
-              Board.Easy -> Board.Medium
-              Board.Medium -> Board.Hard
-              Board.Hard -> Board.Easy
+              Easy -> Medium
+              Medium -> Hard
+              Hard -> Easy
     diff  = psDifficulty s
 
 debugMode :: Bool
-debugMode = True
+debugMode = False

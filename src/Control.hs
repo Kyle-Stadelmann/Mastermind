@@ -22,7 +22,7 @@ control s ev = case ev of
                                            in
                                            newGame s' =<< liftIO (generateCode (determineAllowDupes diff') cols')
   T.VtyEvent (V.EvKey V.KBS _)          -> Brick.continue (handleBackspace s)
-  T.VtyEvent (V.EvKey (V.KChar key) _)  -> inputCharKey s key
+  T.VtyEvent (V.EvKey (V.KChar key) _)  -> Brick.continue $ inputCharKey s key
   T.VtyEvent (V.EvKey V.KLeft _)        -> Brick.continue (move left  s)
   T.VtyEvent (V.EvKey V.KRight _)       -> Brick.continue (move (right cols) s)
   T.VtyEvent (V.EvKey V.KEsc _)         -> Brick.halt s
@@ -44,14 +44,21 @@ move f s = if gameFinished
                      Nothing -> False
     result = psResult s    
 
-inputCharKey :: PlayState -> Char -> EventM n (Next PlayState)
-inputCharKey s key = case maybeColor of
-                  Just color -> Brick.continue s { psBoard = (insertColor board pos color) }
-                  Nothing    -> Brick.continue s
+inputCharKey :: PlayState -> Char -> PlayState
+inputCharKey s key = 
+  if gameFinished
+    then s
+    else case maybeColor of
+           Just color -> s { psBoard = (insertColor board pos color) }
+           Nothing    -> s
   where
     maybeColor = M.lookup key keyColorMap
     board      = psBoard s
     pos        = psPos s
+    gameFinished = case result of
+                     Just _ -> True
+                     Nothing -> False
+    result = psResult s    
 
 
 inputEnterKey :: PlayState -> EventM n (Next PlayState)
@@ -99,8 +106,14 @@ newGame s newCode = Brick.continue s'
     difficulty = psDifficulty s
 
 handleBackspace :: PlayState -> PlayState
-handleBackspace s = s {psBoard = board'}
+handleBackspace s = if gameFinished
+                      then s
+                      else s {psBoard = board'}
   where
     board' = insertColor board pos defaultColor
     pos = psPos s
     board = psBoard s
+    gameFinished = case result of
+                     Just _ -> True
+                     Nothing -> False
+    result = psResult s    

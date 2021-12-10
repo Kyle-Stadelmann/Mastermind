@@ -29,7 +29,19 @@ executable Mastermind
 test-suite tests
   default-language: Haskell98
   type:              exitcode-stdio-1.0
-  hs-source-dirs:    tests
+  hs-source-dirs:    tests,src
+  build-depends:       base >=4.9, 
+                       random >=1.1 && <1.2,
+                       containers,
+                       vty, 
+                       brick,
+                       mtl,
+                       filepath,
+                       QuickCheck,
+                       tasty,
+                       tasty-hunit,
+                       tasty-quickcheck,
+                       process
   ghc-options:       -W -threaded
   main-is:           Test.hs
   build-depends:     base >=4.9, process
