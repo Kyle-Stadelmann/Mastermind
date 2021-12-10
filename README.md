@@ -12,7 +12,7 @@ Ensure [stack](https://docs.haskellstack.org/en/stable/README/#how-to-install) i
 ``` stack run ```
 
 ## End Result
-![Final Result](https://i.imgur.com/tDER40G.jpg)
+![Final Result](https://i.imgur.com/SlqsAhE.jpg)
 
 ## Timeline/Explanation (Extra Information)
 I didn't realize until a couple days before the proposal deadline that the final project wasn't required to be done indvidually for comprehensive exam students, and I don't know anyone in this course so I wasn't able to find a group in time (extremely sorry about this).
