@@ -12,7 +12,6 @@ import           System.IO
 import           Control.Exception
 import           Text.Printf
 import           System.FilePath
-import qualified Test.QuickCheck as QC
 
 type Score = IORef (Int, Int)
 
