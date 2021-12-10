@@ -4,6 +4,13 @@ For my CSE 230 final project I intend to develop the game [Mastermind](https://e
 ## Quick Game Overview (Actual Proposal)
 Mastermind is a 2-player puzzle game where one player is the "codemaker" and the other the "codebreaker". While there are multiple variations of the rules/board, the one I will be implementing consists of 10 rows of 4 peg slots each. Pegs come in 6 different colors. The codemaker (the computer) will choose an order of 4 different colored pegs, and the player's goal is to guess this combination. The player has 10 attempts at doing so. Each attempt will result in the computer giving hints. The hints work as follows: for every correctly placed colored-peg, one red 'key-peg' is displayed, and for every other colored-peg that contains a correct color but wrong position, one white 'key-peg' is displayed. The player uses logic based on these key-pegs to make their next guess. The player wins if they guess correctly on or before their 10th attempt.
 
+## Installation
+Ensure [stack](https://docs.haskellstack.org/en/stable/README/#how-to-install) is installed.
+``` stack install ```
+
+## Usage
+``` stack run ```
+
 ## Timeline/Explanation (Extra Information)
 I didn't realize until a couple days before the proposal deadline that the final project wasn't required to be done indvidually for comprehensive exam students, and I don't know anyone in this course so I wasn't able to find a group in time (extremely sorry about this).
 Nonetheless, I would like to embark on this project solo due to various reasons (I hope with the following justification/timeline, to gain permission). My past relevant coursework includes CSE 130, 131, 231 and now 230. In CSE 231, I participated in a group project at the end of the course [link to my group's repo here](https://github.com/R167/chocopy-wasm-compiler). This project was fun/interesting, but I found it somewhat dissapointing as I couldn't contribute as much as I wanted to due to the lack of available work combined with the group setting. So in order to make this a project I'm more proud of (and fully understand the intricacies of) I'd like to attempt it individually. I'm prepared to put in the extra hours/work to make this a successful project- as this is the kind of side-project that I would enjoy outside of school anyway. Thank you for the consideration, and I deeply apologize for not finding a group in time.
