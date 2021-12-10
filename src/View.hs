@@ -93,6 +93,7 @@ makeControls :: Widget n
 makeControls = hLimit 36
                $ vBox ([ makeControl "Left" "←"
                        , makeControl "Right" "→"
+                       , makeControl "Delete color" "Backspace"
                        , makeControl "End turn" "Enter"
                        , makeControl "End game" "Esc"
                        , makeControl "New game" "="

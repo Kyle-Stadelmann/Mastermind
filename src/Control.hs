@@ -21,6 +21,7 @@ control s ev = case ev of
                                                cols' = determineCols diff'
                                            in
                                            newGame s' =<< liftIO (generateCode (determineAllowDupes diff') cols')
+  T.VtyEvent (V.EvKey V.KBS _)          -> Brick.continue (handleBackspace s)
   T.VtyEvent (V.EvKey (V.KChar key) _)  -> inputCharKey s key
   T.VtyEvent (V.EvKey V.KLeft _)        -> Brick.continue (move left  s)
   T.VtyEvent (V.EvKey V.KRight _)       -> Brick.continue (move (right cols) s)
@@ -96,3 +97,10 @@ newGame s newCode = Brick.continue s'
                     , psTicks      = 0
                     }
     difficulty = psDifficulty s
+
+handleBackspace :: PlayState -> PlayState
+handleBackspace s = s {psBoard = board'}
+  where
+    board' = insertColor board pos defaultColor
+    pos = psPos s
+    board = psBoard s
