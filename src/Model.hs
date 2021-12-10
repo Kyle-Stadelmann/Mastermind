@@ -20,13 +20,13 @@ data State
   
 data PlayState = PS
   { psCode       :: Code            -- generated answer color code
-  , psTurn       :: Int                   -- what turn we are on (current row)
+  , psTurn       :: Int             -- what turn we are on (current row)
   , psBoard      :: Board           -- current board (player rows)
   , psPos        :: Pos             -- current cursor (within the current row)
   , psHints      :: Hints           -- current hints given thus far
   , psResult     :: Maybe Result    -- game result
   , psDifficulty :: Difficulty      -- game difficulty
-  , psTicks      :: Int                   -- how many ticks have passed since game started
+  , psTicks      :: Int             -- how many ticks have passed since game started
   } 
 
 

@@ -76,6 +76,7 @@ countColorPosHelper (count, carryCode, carryColors) (code:codes) (color:colors) 
     (count', carryCode', carryColors') = if code == color
                                            then (count+1, carryCode,      carryColors)
                                            else (count,   code:carryCode, color:carryColors)
+countColorPosHelper _ _ _      = undefined                                       
 
 deleteElem :: Eq a => a -> [a] -> [a]
 deleteElem element [] = []
